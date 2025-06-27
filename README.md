@@ -452,7 +452,7 @@ For suggestions or issues:
 - [Python Virtual Environments](https://docs.python.org/3/tutorial/venv.html)
 
 ### 💡 **Related Projects:**
-- https://github.com/KhaiHuynhVN/mcp-server-agent-comm
+[- https://github.com/KhaiHuynhVN/mcp-server-agent-comm](https://github.com/KhaiHuynhVN/mcp-server-agent-comm)
 
 ## 📄 License & Legal
 
