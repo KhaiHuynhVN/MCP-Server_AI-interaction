@@ -30,4 +30,4 @@ SUPPORTED_LANGUAGES = ["en", "vi"]
 DEFAULT_LANGUAGE = "en" 
 
 # Auto keep-alive settings
-AUTO_KEEPALIVE_MINUTES = 12  # Thời gian timeout cho auto keep-alive feature (phút) 
+AUTO_KEEPALIVE_MINUTES = 11  # Thời gian timeout cho auto keep-alive feature (phút) 
