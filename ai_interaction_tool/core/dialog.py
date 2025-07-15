@@ -960,13 +960,13 @@ class InputDialog(QtWidgets.QDialog):
         keepalive_message = self.get_translation("auto_keepalive_message")
         
         # Set message trong input field
-        self.input_text.setPlainText(keepalive_message)
+        self.input.setPlainText(keepalive_message)
         
         # Force continue_chat = true cho keep-alive
         self.continue_checkbox.setChecked(True)
         
         # Submit
-        self.submit()
+        self.submit_text()
         
     def on_auto_keepalive_toggled(self, checked):
         """Xử lý khi auto keep-alive checkbox được toggle"""
