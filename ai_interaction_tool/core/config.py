@@ -41,7 +41,8 @@ class ConfigManager:
             'ui_preferences': {
                 'continue_chat_default': True,
                 'remember_last_path': True,
-                'auto_expand_folders': True
+                'auto_expand_folders': True,
+                'auto_keepalive_default': False
             }
         }
     

@@ -431,7 +431,20 @@ class InputDialog(QtWidgets.QDialog):
         self.continue_checkbox.setToolTip("Khi chọn, Agent sẽ tự động hiển thị lại hộp thoại này sau khi trả lời")
         self.layout.addWidget(self.continue_checkbox)
         
-
+        # Thêm auto keep-alive checkbox và timer
+        auto_keepalive_default = self.config_manager.get('ui_preferences.auto_keepalive_default', False)
+        self.auto_keepalive_checkbox = QtWidgets.QCheckBox(self.get_translation("auto_keepalive_checkbox"), self)
+        self.auto_keepalive_checkbox.setChecked(auto_keepalive_default)
+        self.auto_keepalive_checkbox.setToolTip("Tự động gửi tin nhắn duy trì kênh chat sau 15 phút để tránh timeout")
+        self.layout.addWidget(self.auto_keepalive_checkbox)
+        
+        # Timer label
+        self.timer_label = QtWidgets.QLabel(self.get_translation("auto_keepalive_timer").format(minutes=15, seconds=0), self)
+        self.timer_label.setStyleSheet("color: #f9e2af; font-weight: bold;")
+        self.layout.addWidget(self.timer_label)
+        
+        # Setup countdown timer
+        self.setup_keepalive_timer()
         
         # Thêm nhãn cảnh báo về quy tắc gọi lại
         self.warning_label = QtWidgets.QLabel(
@@ -522,6 +535,7 @@ class InputDialog(QtWidgets.QDialog):
         self.language_label.setText(self.get_translation("language_label"))
 
         self.continue_checkbox.setText(self.get_translation("continue_checkbox"))
+        self.auto_keepalive_checkbox.setText(self.get_translation("auto_keepalive_checkbox"))
         # No thinking UI to update
         self.warning_label.setText(self.get_translation("warning_label"))
         
@@ -881,6 +895,11 @@ class InputDialog(QtWidgets.QDialog):
         """Save window size và images khi đóng dialog"""
         self.save_window_size()
         
+        # Cleanup keep-alive timer để tránh memory leak
+        if hasattr(self, 'keepalive_timer') and self.keepalive_timer.isActive():
+            self.keepalive_timer.stop()
+            self.keepalive_timer.deleteLater()
+        
         # Save images to config if widget exists
         if hasattr(self, 'image_attachment_widget'):
             self.image_attachment_widget.save_images_to_config()
@@ -897,6 +916,62 @@ class InputDialog(QtWidgets.QDialog):
             self.submit_text()
         else:
             super().keyPressEvent(event)
+
+    def setup_keepalive_timer(self):
+        """Setup countdown timer cho auto keep-alive feature"""
+        # Timer properties
+        self.keepalive_total_seconds = 15 * 60  # 15 minutes
+        self.keepalive_remaining_seconds = self.keepalive_total_seconds
+        
+        # QTimer để countdown
+        self.keepalive_timer = QtCore.QTimer(self)
+        self.keepalive_timer.timeout.connect(self.update_keepalive_timer)
+        self.keepalive_timer.start(1000)  # Update every second
+        
+        # Connect checkbox để save preference
+        self.auto_keepalive_checkbox.toggled.connect(self.on_auto_keepalive_toggled)
+        
+    def update_keepalive_timer(self):
+        """Update countdown timer và auto-submit khi hết thời gian"""
+        if self.keepalive_remaining_seconds <= 0:
+            # Auto submit nếu checkbox được check
+            if self.auto_keepalive_checkbox.isChecked():
+                self.auto_submit_keepalive()
+                return
+            else:
+                # Reset timer nếu checkbox không được check
+                self.keepalive_remaining_seconds = self.keepalive_total_seconds
+        
+        # Update display
+        minutes = self.keepalive_remaining_seconds // 60
+        seconds = self.keepalive_remaining_seconds % 60
+        self.timer_label.setText(
+            self.get_translation("auto_keepalive_timer").format(
+                minutes=minutes, 
+                seconds=f"{seconds:02d}"
+            )
+        )
+        
+        # Countdown
+        self.keepalive_remaining_seconds -= 1
+        
+    def auto_submit_keepalive(self):
+        """Auto submit tin nhắn keep-alive"""
+        keepalive_message = self.get_translation("auto_keepalive_message")
+        
+        # Set message trong input field
+        self.input_text.setPlainText(keepalive_message)
+        
+        # Force continue_chat = true cho keep-alive
+        self.continue_checkbox.setChecked(True)
+        
+        # Submit
+        self.submit()
+        
+    def on_auto_keepalive_toggled(self, checked):
+        """Xử lý khi auto keep-alive checkbox được toggle"""
+        # Save preference only - không reset timer
+        self.config_manager.set('ui_preferences.auto_keepalive_default', checked)
 
     def _refresh_button_styles(self):
         """Force refresh button styles để apply semantic colors"""
