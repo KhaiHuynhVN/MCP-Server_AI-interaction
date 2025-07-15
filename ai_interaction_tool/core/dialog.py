@@ -18,7 +18,7 @@ from ..ui.styles import (
 )
 from ..utils.translations import get_translations, get_translation
 from ..constants import (
-    SHADOW_BLUR_RADIUS, SHADOW_OFFSET, SHADOW_OPACITY
+    SHADOW_BLUR_RADIUS, SHADOW_OFFSET, SHADOW_OPACITY, AUTO_KEEPALIVE_MINUTES
 )
 
 class PasteImageTextEdit(QtWidgets.QTextEdit):
@@ -435,11 +435,11 @@ class InputDialog(QtWidgets.QDialog):
         auto_keepalive_default = self.config_manager.get('ui_preferences.auto_keepalive_default', False)
         self.auto_keepalive_checkbox = QtWidgets.QCheckBox(self.get_translation("auto_keepalive_checkbox"), self)
         self.auto_keepalive_checkbox.setChecked(auto_keepalive_default)
-        self.auto_keepalive_checkbox.setToolTip("Tự động gửi tin nhắn duy trì kênh chat sau 15 phút để tránh timeout")
+        self.auto_keepalive_checkbox.setToolTip(f"Tự động gửi tin nhắn duy trì kênh chat sau {AUTO_KEEPALIVE_MINUTES} phút để tránh timeout")
         self.layout.addWidget(self.auto_keepalive_checkbox)
         
         # Timer label
-        self.timer_label = QtWidgets.QLabel(self.get_translation("auto_keepalive_timer").format(minutes=15, seconds=0), self)
+        self.timer_label = QtWidgets.QLabel(self.get_translation("auto_keepalive_timer").format(minutes=AUTO_KEEPALIVE_MINUTES, seconds=0), self)
         self.timer_label.setStyleSheet("color: #f9e2af; font-weight: bold;")
         self.layout.addWidget(self.timer_label)
         
@@ -920,7 +920,7 @@ class InputDialog(QtWidgets.QDialog):
     def setup_keepalive_timer(self):
         """Setup countdown timer cho auto keep-alive feature"""
         # Timer properties
-        self.keepalive_total_seconds = 15 * 60  # 15 minutes
+        self.keepalive_total_seconds = AUTO_KEEPALIVE_MINUTES * 60  # Lấy từ constants.py
         self.keepalive_remaining_seconds = self.keepalive_total_seconds
         
         # QTimer để countdown
@@ -957,7 +957,7 @@ class InputDialog(QtWidgets.QDialog):
         
     def auto_submit_keepalive(self):
         """Auto submit tin nhắn keep-alive"""
-        keepalive_message = self.get_translation("auto_keepalive_message")
+        keepalive_message = self.get_translation("auto_keepalive_message").format(timeout_minutes=AUTO_KEEPALIVE_MINUTES)
         
         # Set message trong input field
         self.input.setPlainText(keepalive_message)

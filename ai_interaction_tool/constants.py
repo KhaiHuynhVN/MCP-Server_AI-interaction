@@ -28,3 +28,6 @@ DEFAULT_PATH = os.path.expanduser("~")
 # Languages
 SUPPORTED_LANGUAGES = ["en", "vi"]
 DEFAULT_LANGUAGE = "en" 
+
+# Auto keep-alive settings
+AUTO_KEEPALIVE_MINUTES = 15  # Thời gian timeout cho auto keep-alive feature (phút) 
