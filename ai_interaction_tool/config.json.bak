@@ -1,14 +1,14 @@
 {
   "language": "vi",
   "window_size": {
-    "width": 1160,
-    "height": 814
+    "width": 1161,
+    "height": 885
   },
   "ui_preferences": {
     "continue_chat_default": true,
     "remember_last_path": true,
     "auto_expand_folders": true,
-    "auto_keepalive_default": true,
+    "auto_keepalive_default": false,
     "enable_thinking_default": "high",
     "max_reasoning_default": false,
     "save_images_enabled": false
@@ -22,6 +22,12 @@
         "workspace_name": "AI-interaction",
         "name": "ai_interaction_tool",
         "type": "folder"
+      },
+      {
+        "relative_path": "AI-interaction/main.py",
+        "workspace_name": "AI-interaction",
+        "name": "main.py",
+        "type": "file"
       }
     ]
   },

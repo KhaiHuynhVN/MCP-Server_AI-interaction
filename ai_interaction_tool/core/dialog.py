@@ -996,4 +996,175 @@ class InputDialog(QtWidgets.QDialog):
         if dialog.result_ready:
             return dialog.result_text, dialog.result_continue, True
         else:
-            return "", False, False 
+            return "", False, False
+
+
+class PersistentInputDialog(InputDialog):
+    """
+    Persistent version of InputDialog that doesn't close after submit
+    Communicates with MCP tool via communication bridge
+    """
+    
+    def __init__(self):
+        super().__init__()
+        
+        # Import bridge here to avoid circular import
+        from .communication_bridge import get_bridge
+        self.bridge = get_bridge()
+        
+        # Current request being handled
+        self.current_request_id = None
+        
+        # Timer to check for new requests
+        self.request_timer = QtCore.QTimer(self)
+        self.request_timer.timeout.connect(self.check_for_requests)
+        self.request_timer.start(1000)  # Check every second
+        
+        # Update window title to indicate persistent mode
+        self.setWindowTitle(f"{self.get_translation('window_title')} - Persistent Mode")
+        
+        # Disable close button to prevent accidental closure
+        self.close_btn.setText("Minimize")
+        self.close_btn.clicked.disconnect()
+        self.close_btn.clicked.connect(self.showMinimized)
+        self.close_btn.setToolTip("Minimize window (keep running in background)")
+    
+
+    
+    def check_for_requests(self):
+        """Check for incoming requests from MCP tool"""
+        request = self.bridge.get_current_request()
+        
+        if request and request.get("status") == "waiting":
+            request_id = request.get("id")
+            
+            # Only process new requests
+            if request_id != self.current_request_id:
+                self.current_request_id = request_id
+                
+                # Bring window to front
+                self.raise_()
+                self.activateWindow()
+                self.showNormal()  # Restore if minimized
+                
+                # Focus on input
+                self.input.setFocus()
+    
+
+    
+    def submit_text(self):
+        """
+        Override submit to send response via bridge instead of closing
+        """
+        text = self.input.toPlainText()
+        attached_images = self.image_attachment_widget.get_attached_images() if hasattr(self, 'image_attachment_widget') else []
+        
+        if not self.current_request_id:
+            QtWidgets.QMessageBox.information(
+                self,
+                "No Active Request",
+                "No active request from agent. Please wait for agent to call the tool."
+            )
+            return
+        
+        if text.strip() or self.attached_files or attached_images:
+            result_dict = {
+                "text": text,
+                "language": self.current_language
+            }
+            
+            # Add attached files info
+            if self.attached_files:
+                result_dict["attached_files"] = []
+                for item_info in self.attached_files:
+                    try:
+                        relative_path = item_info["relative_path"]
+                        workspace_name = item_info["workspace_name"]
+                        name = item_info["name"]
+                        item_type = item_info["type"]
+                        
+                        result_dict["attached_files"].append({
+                            "relative_path": relative_path,
+                            "workspace_name": workspace_name,
+                            "name": name,
+                            "type": item_type
+                        })
+                    except Exception as e:
+                        result_dict["attached_files"].append({
+                            "relative_path": item_info.get("relative_path", "unknown"),
+                            "workspace_name": item_info.get("workspace_name", ""),
+                            "name": item_info.get("name", "unknown"),
+                            "type": item_info.get("type", "unknown"),
+                            "error": str(e)
+                        })
+            
+            # Add attached images info
+            if attached_images:
+                result_dict["attached_images"] = []
+                for img_info in attached_images:
+                    result_dict["attached_images"].append({
+                        "base64_data": img_info["base64_data"],
+                        "media_type": img_info["media_type"],
+                        "filename": img_info["filename"]
+                    })
+            
+            # Create JSON response exactly like original InputDialog
+            response_json = json.dumps(result_dict, ensure_ascii=False)
+            continue_chat = self.continue_checkbox.isChecked()
+            
+            # Send raw JSON via bridge (engine will process it)
+            success = self.bridge.send_response(
+                self.current_request_id, 
+                response_json, 
+                continue_chat
+            )
+            
+            if success:
+                # Reset UI for next input
+                self._reset_ui()
+                self.current_request_id = None
+            else:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Send Failed",
+                    "Failed to send response to agent. Please try again."
+                )
+        else:
+            QtWidgets.QMessageBox.information(
+                self,
+                "Empty Input",
+                "Please enter some text or attach files before sending."
+            )
+    
+
+    
+    def _reset_ui(self):
+        """Reset UI elements for next input"""
+        # Clear input text
+        self.input.clear()
+        
+        # Save preferences
+        self.config_manager.set('ui_preferences.continue_chat_default', self.continue_checkbox.isChecked())
+        self.config_manager.save_config()
+        
+        # Save images to config
+        if hasattr(self, 'image_attachment_widget'):
+            self.image_attachment_widget.save_images_to_config()
+        
+        # Don't clear attached files/images to allow reuse
+        # User can manually clear if needed
+        
+        # Focus back to input
+        self.input.setFocus()
+    
+    def closeEvent(self, event):
+        """Override close event to minimize instead of closing"""
+        event.ignore()
+        self.showMinimized()
+        
+        # Show system tray notification if available
+        QtWidgets.QMessageBox.information(
+            self,
+            "Minimized",
+            "AI Interaction Tool is minimized but still running.\nAgent can still send requests."
+        ) 
