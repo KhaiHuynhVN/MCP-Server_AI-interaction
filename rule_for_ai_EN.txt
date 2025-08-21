@@ -2,9 +2,9 @@
 ===============================================================================
 On receiving the first message of a new conversation, the agent must parse the content to identify the activation keyword.
 
-**If the message starts with `khởi động ai_interaction`:** The agent must activate the **AI Interaction Mode** and follow the `AI INTERACTION RULES`.
+**If the message starts with `start ai_interaction`:** The agent must activate the **AI Interaction Mode** and follow the `AI INTERACTION RULES`.
 
-**If the message starts with `khởi động agent chat 1` or `khởi động agent chat 2`:** The agent must activate the **Agent Communication Mode** and follow the `AGENT COMMUNICATION RULES`.
+**If the message starts with `start agent chat 1` or `start agent chat 2`:** The agent must activate the **Agent Communication Mode** and follow the `AGENT COMMUNICATION RULES`.
 ===============================================================================
 
 🚀 AI INTERACTION RULES 🚀
