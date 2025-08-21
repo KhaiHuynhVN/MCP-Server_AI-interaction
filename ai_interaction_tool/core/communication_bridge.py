@@ -6,6 +6,9 @@ import threading
 from pathlib import Path
 from typing import Optional, Dict, Any
 import tempfile
+from ..constants import AGENT_AUTO_KEEPALIVE_SECONDS
+from ..utils.translations import get_translation
+from .config import ConfigManager
 
 class CommunicationBridge:
     """
@@ -57,33 +60,47 @@ class CommunicationBridge:
             # Update status to indicate waiting for input
             self._update_status("waiting_for_input", request_id)
         
-        # Wait for response with timeout
-        start_time = time.time()
-        while time.time() - start_time < timeout:
-            if os.path.exists(self.response_file):
-                try:
-                    with open(self.response_file, 'r', encoding='utf-8') as f:
-                        response_data = json.load(f)
-                    
-                    # Check if response is for our request
-                    if response_data.get("request_id") == request_id:
-                        # Clean up response file
-                        os.remove(self.response_file)
-                        self._update_status("idle")
-                        # Return complete response data instead of just content
-                        return {
-                            "content": response_data.get("content", ""),
-                            "continue_chat": response_data.get("continue_chat", False)
-                        }
-                        
-                except (json.JSONDecodeError, FileNotFoundError):
-                    pass
-            
-            time.sleep(0.1)  # Check every 100ms
+        # Setup auto keep-alive thread
+        stop_keepalive = threading.Event()
+        keepalive_thread = threading.Thread(
+            target=self._auto_keepalive_worker, 
+            args=(request_id, stop_keepalive),
+            daemon=True
+        )
+        keepalive_thread.start()
         
-        # Timeout occurred
-        self._update_status("timeout", request_id)
-        return None
+        try:
+            # Wait for response with timeout
+            start_time = time.time()
+            while time.time() - start_time < timeout:
+                if os.path.exists(self.response_file):
+                    try:
+                        with open(self.response_file, 'r', encoding='utf-8') as f:
+                            response_data = json.load(f)
+                        
+                        # Check if response is for our request
+                        if response_data.get("request_id") == request_id:
+                            # Clean up response file
+                            os.remove(self.response_file)
+                            self._update_status("idle")
+                            # Return complete response data instead of just content
+                            return {
+                                "content": response_data.get("content", ""),
+                                "continue_chat": response_data.get("continue_chat", False)
+                            }
+                            
+                    except (json.JSONDecodeError, FileNotFoundError):
+                        pass
+                
+                time.sleep(0.1)  # Check every 100ms
+            
+            # Timeout occurred
+            self._update_status("timeout", request_id)
+            return None
+            
+        finally:
+            # Always stop the keepalive thread when exiting
+            stop_keepalive.set()
     
     def send_response(self, request_id: str, content: str, continue_chat: bool = False) -> bool:
         """
@@ -149,6 +166,39 @@ class CommunicationBridge:
             pass
         
         return {"status": "idle"}
+    
+    def _auto_keepalive_worker(self, request_id: str, stop_event: threading.Event):
+        """
+        Auto keep-alive worker thread
+        Sends keep-alive message after AGENT_AUTO_KEEPALIVE_SECONDS if no response received
+        
+        Args:
+            request_id: Request ID to send keep-alive for
+            stop_event: Event to stop the worker
+        """
+        # Wait for the specified timeout period
+        if stop_event.wait(timeout=AGENT_AUTO_KEEPALIVE_SECONDS):
+            # Stop event was set, exit cleanly
+            return
+        
+        # Check if request is still pending (no response received yet)
+        if not os.path.exists(self.response_file):
+            # Get current language from config
+            try:
+                config_manager = ConfigManager()
+                current_language = config_manager.get_language()
+            except Exception:
+                # Fallback to English if config fails
+                current_language = "en"
+            
+            # Get auto keep-alive message template with translation
+            timeout_minutes = round(AGENT_AUTO_KEEPALIVE_SECONDS / 60, 1)
+            keepalive_message = get_translation(current_language, "auto_keepalive_message").format(
+                timeout_minutes=timeout_minutes
+            )
+            
+            # Send the keep-alive response with continue_chat=true
+            self.send_response(request_id, keepalive_message, continue_chat=True)
     
     def _update_status(self, status: str, request_id: Optional[str] = None, continue_chat: Optional[bool] = None):
         """Update status file with current state"""

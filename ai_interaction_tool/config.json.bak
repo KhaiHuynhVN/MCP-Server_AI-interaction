@@ -28,6 +28,12 @@
         "workspace_name": "AI-interaction",
         "name": "main.py",
         "type": "file"
+      },
+      {
+        "relative_path": "AI-interaction/autoClick.js",
+        "workspace_name": "AI-interaction",
+        "name": "autoClick.js",
+        "type": "file"
       }
     ]
   },

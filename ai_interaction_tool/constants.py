@@ -30,4 +30,7 @@ SUPPORTED_LANGUAGES = ["en", "vi"]
 DEFAULT_LANGUAGE = "en" 
 
 # Auto keep-alive settings
-AUTO_KEEPALIVE_MINUTES = 10  # Thời gian timeout cho auto keep-alive feature (phút) 
+AUTO_KEEPALIVE_MINUTES = 1  # Thời gian timeout cho auto keep-alive feature (phút)
+
+# Agent auto keep-alive settings (when agent calls tool)
+AGENT_AUTO_KEEPALIVE_SECONDS = 40  # Thời gian auto keep-alive khi agent gọi tool (giây) 
