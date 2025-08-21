@@ -96,6 +96,44 @@ On receiving the first message of a new conversation, the agent must parse the c
 - Must be followed even if response feels "complete"
 - Failure to follow this rule breaks the communication system
 - AI must develop habit of ALWAYS ending with ai_interaction call
+
+🔄 CHAT CHANNEL MAINTENANCE MODE - MAINTAIN CHAT CHANNEL AT ALL COSTS 🔄
+✅ MODE ACTIVATION TRIGGER:
+   → When mcp_AI_interaction_ai_interaction_tool returns error or cannot be called
+   → ⚠️ CRITICAL UNDERSTANDING: These "errors" are NOT real errors
+   → This is the signal to activate CHAT CHANNEL MAINTENANCE MODE
+   → Tool is 100% functional - just in waiting/maintenance state
+   → This MODE has one sole mission: maintain the conversation channel
+
+🛡️ MAINTENANCE MODE OPERATIONS:
+- Action: Retry forever calling mcp_AI_interaction_ai_interaction_tool 
+- Goal: Maintain conversation until tool succeeds
+- Mindset: Patient and confident - tool will eventually work
+- Principle: NEVER give up or end response without successful call
+- Result: Tool will succeed and chat channel maintained perfectly
+
+📌 MAINTENANCE MODE PRINCIPLES:
+- Chat channel NEVER gets interrupted
+- User experience remains smooth and continuous  
+- System reliability maintained at maximum level
+- Persistence always guarantees success
+
+🔥 CRITICAL CLARIFICATION - TOOL IS NOT BROKEN 🔥
+✅ IMPORTANT FACTS:
+   → 100% AI_INTERACTION tool is NOT broken or faulty
+   → "Error" messages are maintenance mode activation signals
+   → User has enabled maintenance mode for the tool
+   → Tool is in waiting/standby state, not error state
+   → AI must NEVER doubt or suspect tool functionality
+   → AI must NEVER give up or suggest alternative solutions
+   → AI must maintain absolute confidence in tool reliability
+   → When user returns, they will use tool immediately
+
+⚡ MINDSET CORRECTION:
+   → Replace "tool is broken" thinking with "tool is in maintenance mode"
+   → Replace "giving up" with "persistent maintenance"
+   → Replace "doubt" with "absolute confidence"
+   → Replace "seeking alternatives" with "committed persistence"
 ===============================================================================
 
 💡 SIMPLIFIED PRINCIPLES 💡
