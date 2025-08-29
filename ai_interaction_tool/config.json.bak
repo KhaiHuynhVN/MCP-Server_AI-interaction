@@ -24,15 +24,9 @@
         "type": "folder"
       },
       {
-        "relative_path": "AI-interaction/main.py",
+        "relative_path": "AI-interaction/ai_interaction_tool/constants.py",
         "workspace_name": "AI-interaction",
-        "name": "main.py",
-        "type": "file"
-      },
-      {
-        "relative_path": "AI-interaction/autoClick.js",
-        "workspace_name": "AI-interaction",
-        "name": "autoClick.js",
+        "name": "constants.py",
         "type": "file"
       }
     ]

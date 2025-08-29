@@ -21,8 +21,14 @@ def run_ui(*args, **kwargs):
     bridge = get_bridge()
     request_id = str(uuid.uuid4())
     
-    # Send request to persistent UI
-    response = bridge.send_request(request_id, timeout=300)  # 5 minute timeout
+    # Create timestamp file for countdown timer
+    _create_countdown_timestamp_file()
+    
+    # Send request to persistent UI  
+    # Dynamic timeout: ensure bridge timeout > agent keepalive timeout to prevent race condition
+    from .constants import AGENT_AUTO_KEEPALIVE_SECONDS
+    dynamic_timeout = max(300, AGENT_AUTO_KEEPALIVE_SECONDS + 60)  # At least 1 minute buffer
+    response = bridge.send_request(request_id, timeout=dynamic_timeout)
     
     if response is not None:
         # Got response from persistent UI - response is now dict with content and continue_chat
@@ -171,3 +177,78 @@ def run_persistent_ui():
     
     # Start Qt event loop
     return app.exec_()
+
+def _create_countdown_timestamp_file():
+    """Create timestamp file when agent calls tool for countdown timer"""
+    import os
+    from .constants import AGENT_AUTO_KEEPALIVE_SECONDS
+    
+    # Create timestamp file in current workspace directory
+    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    timestamp_file = os.path.join(current_dir, "ai_interaction_countdown.json")
+    
+    timestamp_data = {
+        "start_time": time.time(),
+        "timeout_seconds": AGENT_AUTO_KEEPALIVE_SECONDS
+    }
+    
+    try:
+        with open(timestamp_file, 'w', encoding='utf-8') as f:
+            json.dump(timestamp_data, f, ensure_ascii=False, indent=2)
+        # Debug: print success
+        print(f"Countdown file created: {timestamp_file}")
+    except Exception as e:
+        # Debug: print error
+        print(f"Error creating countdown file: {e}")
+        pass  # Ignore errors, countdown will just not work
+
+def get_countdown_remaining_time():
+    """Get remaining countdown time from timestamp file"""
+    import os
+    from .constants import AGENT_AUTO_KEEPALIVE_SECONDS
+    
+    # Read timestamp file from workspace directory
+    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    timestamp_file = os.path.join(current_dir, "ai_interaction_countdown.json")
+    
+    try:
+        if os.path.exists(timestamp_file):
+            with open(timestamp_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            start_time = data.get("start_time", 0)
+            timeout_seconds = data.get("timeout_seconds", AGENT_AUTO_KEEPALIVE_SECONDS)
+            
+            elapsed = time.time() - start_time
+            remaining = timeout_seconds - elapsed
+            
+            print(f"Countdown file found: elapsed={elapsed:.1f}s, remaining={remaining:.1f}s")
+            
+            if remaining > 0:
+                return remaining
+            else:
+                # Expired, remove file
+                print("Countdown expired, removing file")
+                os.remove(timestamp_file)
+                return None
+        else:
+            print(f"Countdown file not found: {timestamp_file}")
+    except Exception as e:
+        print(f"Error reading countdown file: {e}")
+        pass
+    
+    return None
+
+def clear_countdown_timestamp_file():
+    """Clear countdown timestamp file when response is sent"""
+    import os
+    
+    # Clear timestamp file from workspace directory (same as create function)
+    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    timestamp_file = os.path.join(current_dir, "ai_interaction_countdown.json")
+    
+    try:
+        if os.path.exists(timestamp_file):
+            os.remove(timestamp_file)
+    except Exception:
+        pass

@@ -18,7 +18,7 @@ from ..ui.styles import (
 )
 from ..utils.translations import get_translations, get_translation
 from ..constants import (
-    SHADOW_BLUR_RADIUS, SHADOW_OFFSET, SHADOW_OPACITY, AUTO_KEEPALIVE_MINUTES
+    SHADOW_BLUR_RADIUS, SHADOW_OFFSET, SHADOW_OPACITY, AGENT_AUTO_KEEPALIVE_SECONDS
 )
 
 class PasteImageTextEdit(QtWidgets.QTextEdit):
@@ -431,20 +431,7 @@ class InputDialog(QtWidgets.QDialog):
         self.continue_checkbox.setToolTip("Khi chọn, Agent sẽ tự động hiển thị lại hộp thoại này sau khi trả lời")
         self.layout.addWidget(self.continue_checkbox)
         
-        # Thêm auto keep-alive checkbox và timer
-        auto_keepalive_default = self.config_manager.get('ui_preferences.auto_keepalive_default', False)
-        self.auto_keepalive_checkbox = QtWidgets.QCheckBox(self.get_translation("auto_keepalive_checkbox"), self)
-        self.auto_keepalive_checkbox.setChecked(auto_keepalive_default)
-        self.auto_keepalive_checkbox.setToolTip(f"Tự động gửi tin nhắn duy trì kênh chat sau {AUTO_KEEPALIVE_MINUTES} phút để tránh timeout")
-        self.layout.addWidget(self.auto_keepalive_checkbox)
-        
-        # Timer label
-        self.timer_label = QtWidgets.QLabel(self.get_translation("auto_keepalive_timer").format(minutes=AUTO_KEEPALIVE_MINUTES, seconds=0), self)
-        self.timer_label.setStyleSheet("color: #f9e2af; font-weight: bold;")
-        self.layout.addWidget(self.timer_label)
-        
-        # Setup countdown timer
-        self.setup_keepalive_timer()
+        # UI Keepalive removed - now using only agent keepalive system
         
         # Thêm nhãn cảnh báo về quy tắc gọi lại
         self.warning_label = QtWidgets.QLabel(
@@ -535,7 +522,7 @@ class InputDialog(QtWidgets.QDialog):
         self.language_label.setText(self.get_translation("language_label"))
 
         self.continue_checkbox.setText(self.get_translation("continue_checkbox"))
-        self.auto_keepalive_checkbox.setText(self.get_translation("auto_keepalive_checkbox"))
+        # auto_keepalive_checkbox removed - UI keepalive functionality removed
         # No thinking UI to update
         self.warning_label.setText(self.get_translation("warning_label"))
         
@@ -895,11 +882,6 @@ class InputDialog(QtWidgets.QDialog):
         """Save window size và images khi đóng dialog"""
         self.save_window_size()
         
-        # Cleanup keep-alive timer để tránh memory leak
-        if hasattr(self, 'keepalive_timer') and self.keepalive_timer.isActive():
-            self.keepalive_timer.stop()
-            self.keepalive_timer.deleteLater()
-        
         # Save images to config if widget exists
         if hasattr(self, 'image_attachment_widget'):
             self.image_attachment_widget.save_images_to_config()
@@ -916,62 +898,6 @@ class InputDialog(QtWidgets.QDialog):
             self.submit_text()
         else:
             super().keyPressEvent(event)
-
-    def setup_keepalive_timer(self):
-        """Setup countdown timer cho auto keep-alive feature"""
-        # Timer properties
-        self.keepalive_total_seconds = AUTO_KEEPALIVE_MINUTES * 60  # Lấy từ constants.py
-        self.keepalive_remaining_seconds = self.keepalive_total_seconds
-        
-        # QTimer để countdown
-        self.keepalive_timer = QtCore.QTimer(self)
-        self.keepalive_timer.timeout.connect(self.update_keepalive_timer)
-        self.keepalive_timer.start(1000)  # Update every second
-        
-        # Connect checkbox để save preference
-        self.auto_keepalive_checkbox.toggled.connect(self.on_auto_keepalive_toggled)
-        
-    def update_keepalive_timer(self):
-        """Update countdown timer và auto-submit khi hết thời gian"""
-        if self.keepalive_remaining_seconds <= 0:
-            # Auto submit nếu checkbox được check
-            if self.auto_keepalive_checkbox.isChecked():
-                self.auto_submit_keepalive()
-                return
-            else:
-                # Reset timer nếu checkbox không được check
-                self.keepalive_remaining_seconds = self.keepalive_total_seconds
-        
-        # Update display
-        minutes = self.keepalive_remaining_seconds // 60
-        seconds = self.keepalive_remaining_seconds % 60
-        self.timer_label.setText(
-            self.get_translation("auto_keepalive_timer").format(
-                minutes=minutes, 
-                seconds=f"{seconds:02d}"
-            )
-        )
-        
-        # Countdown
-        self.keepalive_remaining_seconds -= 1
-        
-    def auto_submit_keepalive(self):
-        """Auto submit tin nhắn keep-alive"""
-        keepalive_message = self.get_translation("auto_keepalive_message").format(timeout_minutes=AUTO_KEEPALIVE_MINUTES)
-        
-        # Set message trong input field
-        self.input.setPlainText(keepalive_message)
-        
-        # Force continue_chat = true cho keep-alive
-        self.continue_checkbox.setChecked(True)
-        
-        # Submit
-        self.submit_text()
-        
-    def on_auto_keepalive_toggled(self, checked):
-        """Xử lý khi auto keep-alive checkbox được toggle"""
-        # Save preference only - không reset timer
-        self.config_manager.set('ui_preferences.auto_keepalive_default', checked)
 
     def _refresh_button_styles(self):
         """Force refresh button styles để apply semantic colors"""
@@ -998,7 +924,6 @@ class InputDialog(QtWidgets.QDialog):
         else:
             return "", False, False
 
-
 class PersistentInputDialog(InputDialog):
     """
     Persistent version of InputDialog that doesn't close after submit
@@ -1014,6 +939,7 @@ class PersistentInputDialog(InputDialog):
         
         # Current request being handled
         self.current_request_id = None
+        self.current_request_timestamp = 0  # Track timestamp of current request
         
         # Timer to check for new requests
         self.request_timer = QtCore.QTimer(self)
@@ -1028,19 +954,40 @@ class PersistentInputDialog(InputDialog):
         self.close_btn.clicked.disconnect()
         self.close_btn.clicked.connect(self.showMinimized)
         self.close_btn.setToolTip("Minimize window (keep running in background)")
+        
+        # Setup keepalive countdown timer UI
+        self._setup_keepalive_timer_ui()
+        
+        # Check for existing countdown from timestamp file
+        self._check_countdown_from_file()
     
+    def _check_countdown_from_file(self):
+        """Check for existing countdown from timestamp file"""
+        from ..engine import get_countdown_remaining_time
+        
+        remaining_time = get_countdown_remaining_time()
+        if remaining_time and remaining_time > 0:
+            # Start countdown with remaining time
+            self.keepalive_remaining_seconds = remaining_time
+            self._start_keepalive_countdown()
+        else:
+            # No active countdown
+            self._stop_keepalive_countdown()
 
-    
     def check_for_requests(self):
         """Check for incoming requests from MCP tool"""
+        from ..engine import get_countdown_remaining_time
+        
         request = self.bridge.get_current_request()
         
         if request and request.get("status") == "waiting":
             request_id = request.get("id")
+            request_timestamp = request.get("timestamp", 0)
             
-            # Only process new requests
-            if request_id != self.current_request_id:
+            # Only process requests with new timestamp (indicating agent actually called tool)
+            if request_timestamp != self.current_request_timestamp:
                 self.current_request_id = request_id
+                self.current_request_timestamp = request_timestamp
                 
                 # Bring window to front
                 self.raise_()
@@ -1049,6 +996,26 @@ class PersistentInputDialog(InputDialog):
                 
                 # Focus on input
                 self.input.setFocus()
+                
+                # Check countdown from file and start if available
+                remaining_time = get_countdown_remaining_time()
+                if remaining_time and remaining_time > 0:
+                    self.keepalive_remaining_seconds = remaining_time
+                    self._start_keepalive_countdown()
+                else:
+                    # No countdown file or expired
+                    self._stop_keepalive_countdown()
+                
+        elif not request or request.get("status") != "waiting":
+            # No active request - check if we should stop countdown
+            if hasattr(self, 'current_request_id') and self.current_request_id:
+                self.current_request_id = None
+                self.current_request_timestamp = 0
+                
+                # Only stop countdown if no file exists
+                remaining_time = get_countdown_remaining_time()
+                if not remaining_time:
+                    self._stop_keepalive_countdown()
     
 
     
@@ -1120,9 +1087,17 @@ class PersistentInputDialog(InputDialog):
             )
             
             if success:
+                # Clear countdown timestamp file
+                from ..engine import clear_countdown_timestamp_file
+                clear_countdown_timestamp_file()
+                
+                # Stop keepalive countdown since request is completed
+                self._stop_keepalive_countdown()
+                
                 # Reset UI for next input
                 self._reset_ui()
-                self.current_request_id = None
+                
+                # Clear request info - will wait for new timestamp
             else:
                 QtWidgets.QMessageBox.warning(
                     self,
@@ -1157,6 +1132,170 @@ class PersistentInputDialog(InputDialog):
         # Focus back to input
         self.input.setFocus()
     
+    def _setup_keepalive_timer_ui(self):
+        """Setup keepalive countdown timer UI component"""
+        # Create keepalive info container
+        keepalive_container = QtWidgets.QFrame()
+        keepalive_container.setFrameStyle(QtWidgets.QFrame.Box)
+        keepalive_container.setStyleSheet("""
+            QFrame {
+                background-color: #2d3748;
+                border: 1px solid #4a5568;
+                border-radius: 6px;
+                padding: 4px;
+                margin: 2px 0px;
+            }
+        """)
+        
+        keepalive_layout = QtWidgets.QHBoxLayout(keepalive_container)
+        keepalive_layout.setContentsMargins(8, 4, 8, 4)
+        keepalive_layout.setSpacing(8)
+        
+        # Keepalive info label
+        keepalive_info_label = QtWidgets.QLabel("Agent Auto Keep-Alive:")
+        keepalive_info_label.setStyleSheet("""
+            QLabel {
+                color: #e2e8f0;
+                font-weight: bold;
+                font-size: 11px;
+            }
+        """)
+        
+        # Countdown timer display
+        self.keepalive_countdown_label = QtWidgets.QLabel("Waiting...")
+        self.keepalive_countdown_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.keepalive_countdown_label.setStyleSheet("""
+            QLabel {
+                color: #a0aec0;
+                font-weight: bold;
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
+                background-color: #2d3748;
+                border: 1px solid #4a5568;
+                border-radius: 4px;
+                padding: 4px 8px;
+                min-width: 80px;
+            }
+        """)
+        
+        # Settings info
+        settings_label = QtWidgets.QLabel(f"(Timeout: {AGENT_AUTO_KEEPALIVE_SECONDS}s)")
+        settings_label.setStyleSheet("""
+            QLabel {
+                color: #a0aec0;
+                font-size: 9px;
+                font-style: italic;
+            }
+        """)
+        
+        keepalive_layout.addWidget(keepalive_info_label)
+        keepalive_layout.addWidget(self.keepalive_countdown_label)
+        keepalive_layout.addWidget(settings_label)
+        keepalive_layout.addStretch()
+        
+        # Insert at the top of the layout (after language selection)
+        self.layout.insertWidget(1, keepalive_container)
+    
+    def _start_keepalive_countdown(self):
+        """Start the keepalive countdown timer when agent request is received"""
+        # Stop any existing timer first
+        if hasattr(self, 'keepalive_countdown_timer') and self.keepalive_countdown_timer:
+            self.keepalive_countdown_timer.stop()
+        
+        # Initialize countdown value only if not already set
+        if not hasattr(self, 'keepalive_remaining_seconds') or self.keepalive_remaining_seconds <= 0:
+            self.keepalive_remaining_seconds = AGENT_AUTO_KEEPALIVE_SECONDS
+        
+        # Create and start countdown timer
+        self.keepalive_countdown_timer = QtCore.QTimer(self)
+        self.keepalive_countdown_timer.timeout.connect(self._update_keepalive_countdown)
+        self.keepalive_countdown_timer.start(1000)  # Update every second
+        
+        # Update display immediately
+        self._update_keepalive_countdown()
+    
+    def _stop_keepalive_countdown(self):
+        """Stop the keepalive countdown timer and show waiting state"""
+        if hasattr(self, 'keepalive_countdown_timer') and self.keepalive_countdown_timer:
+            self.keepalive_countdown_timer.stop()
+        
+        # Reset to waiting state
+        if hasattr(self, 'keepalive_countdown_label'):
+            self.keepalive_countdown_label.setText("Waiting...")
+            self.keepalive_countdown_label.setStyleSheet("""
+                QLabel {
+                    color: #a0aec0;
+                    font-weight: bold;
+                    font-family: 'Courier New', monospace;
+                    font-size: 12px;
+                    background-color: #2d3748;
+                    border: 1px solid #4a5568;
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                    min-width: 80px;
+                }
+            """)
+    
+    def _update_keepalive_countdown(self):
+        """Update keepalive countdown display"""
+        if not hasattr(self, 'keepalive_remaining_seconds'):
+            self.keepalive_remaining_seconds = AGENT_AUTO_KEEPALIVE_SECONDS
+        
+        # Decrease countdown
+        self.keepalive_remaining_seconds -= 1
+        
+        # Reset when reaches zero (simulating keepalive message sent)
+        if self.keepalive_remaining_seconds <= 0:
+            self.keepalive_remaining_seconds = AGENT_AUTO_KEEPALIVE_SECONDS
+        
+        # Convert to int to avoid float format issues
+        remaining_seconds = int(self.keepalive_remaining_seconds)
+        
+        # Format time as HH:MM:SS
+        hours = remaining_seconds // 3600
+        minutes = (remaining_seconds % 3600) // 60
+        seconds = remaining_seconds % 60
+        
+        if hours > 0:
+            time_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        else:
+            time_str = f"{minutes:02d}:{seconds:02d}"
+        
+        # Update label
+        if hasattr(self, 'keepalive_countdown_label'):
+            self.keepalive_countdown_label.setText(time_str)
+            
+            # Change color based on remaining time
+            if remaining_seconds <= 30:
+                # Red when less than 30 seconds
+                color = "#f56565"
+                bg_color = "#2d1b1b"
+                border_color = "#f56565"
+            elif remaining_seconds <= 60:
+                # Orange when less than 1 minute
+                color = "#ed8936"
+                bg_color = "#2d1f1b"
+                border_color = "#ed8936"
+            else:
+                # Green when plenty of time
+                color = "#48bb78"
+                bg_color = "#1a202c"
+                border_color = "#48bb78"
+            
+            self.keepalive_countdown_label.setStyleSheet(f"""
+                QLabel {{
+                    color: {color};
+                    font-weight: bold;
+                    font-family: 'Courier New', monospace;
+                    font-size: 14px;
+                    background-color: {bg_color};
+                    border: 1px solid {border_color};
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                    min-width: 60px;
+                }}
+            """)
+
     def closeEvent(self, event):
         """Override close event to minimize instead of closing"""
         event.ignore()

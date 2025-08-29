@@ -18,8 +18,9 @@ class CommunicationBridge:
     
     def __init__(self, bridge_dir: Optional[str] = None):
         if bridge_dir is None:
-            # Use temp directory for communication files
-            self.bridge_dir = os.path.join(tempfile.gettempdir(), "ai_interaction_bridge")
+            # Use workspace directory for communication files
+            current_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            self.bridge_dir = os.path.join(current_dir, "ai_interaction_bridge")
         else:
             self.bridge_dir = bridge_dir
         

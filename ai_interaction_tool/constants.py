@@ -29,8 +29,6 @@ DEFAULT_PATH = os.path.expanduser("~")
 SUPPORTED_LANGUAGES = ["en", "vi"]
 DEFAULT_LANGUAGE = "en" 
 
-# Auto keep-alive settings
-AUTO_KEEPALIVE_MINUTES = 1  # Thời gian timeout cho auto keep-alive feature (phút)
-
-# Agent auto keep-alive settings (when agent calls tool)
-AGENT_AUTO_KEEPALIVE_SECONDS = 40  # Thời gian auto keep-alive khi agent gọi tool (giây) 
+# Auto keep-alive settings - Unified system using only agent keepalive
+AGENT_AUTO_KEEPALIVE_SECONDS = 360  # Thời gian auto keep-alive khi agent gọi tool (giây)
+# Note: Can be set to any value >= 5 seconds. Common values: 60, 120, 180, 300 
