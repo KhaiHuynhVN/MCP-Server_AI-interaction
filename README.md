@@ -159,6 +159,11 @@ cat rule_for_ai_VI.txt | xclip -selection clipboard
 
 ### 🚀 Step 7: Launch and Test
 
+!!! -----> In your terminal: python E:\MCP-servers-github\AI-interaction\main.py --ui
+**⚠️ Important**: Replace `E:/MCP-servers-github/AI-interaction/mcp_server.py` with the absolute path to `mcp_server.py` on your system.
+---> AUTO SHOW UI:
+<img width="1164" height="930" alt="image" src="https://github.com/user-attachments/assets/b2b633d1-bc62-4c66-ad21-1c2b8eb71eb5" />
+
 1. **Restart Claude Desktop/Cursor** after configuring MCP server
 2. **Test connection** by calling `ai_interaction` tool
 3. **Test UI popup** to verify functionality
@@ -484,3 +489,4 @@ Project inspired by the need for seamless AI interaction tools with modern UX pr
 **🚀 Happy Coding with AI Interaction Tool!**
 
 *For support, issues, or feature requests, please open an issue on the GitHub repository.*
+
