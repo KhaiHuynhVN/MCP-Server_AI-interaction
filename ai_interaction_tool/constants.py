@@ -30,5 +30,5 @@ SUPPORTED_LANGUAGES = ["en", "vi"]
 DEFAULT_LANGUAGE = "en" 
 
 # Auto keep-alive settings - Unified system using only agent keepalive
-AGENT_AUTO_KEEPALIVE_SECONDS = 360  # Thời gian auto keep-alive khi agent gọi tool (giây)
+AGENT_AUTO_KEEPALIVE_SECONDS = 600  # Thời gian auto keep-alive khi agent gọi tool (giây)
 # Note: Can be set to any value >= 5 seconds. Common values: 60, 120, 180, 300 

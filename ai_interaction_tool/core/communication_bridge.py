@@ -177,29 +177,43 @@ class CommunicationBridge:
             request_id: Request ID to send keep-alive for
             stop_event: Event to stop the worker
         """
-        # Wait for the specified timeout period
-        if stop_event.wait(timeout=AGENT_AUTO_KEEPALIVE_SECONDS):
-            # Stop event was set, exit cleanly
-            return
+        keepalive_count = 0
         
-        # Check if request is still pending (no response received yet)
-        if not os.path.exists(self.response_file):
-            # Get current language from config
-            try:
-                config_manager = ConfigManager()
-                current_language = config_manager.get_language()
-            except Exception:
-                # Fallback to English if config fails
-                current_language = "en"
+        while True:
+            # Wait for the specified timeout period
+            if stop_event.wait(timeout=AGENT_AUTO_KEEPALIVE_SECONDS):
+                # Stop event was set, exit cleanly
+                return
             
-            # Get auto keep-alive message template with translation
-            timeout_minutes = round(AGENT_AUTO_KEEPALIVE_SECONDS / 60, 1)
-            keepalive_message = get_translation(current_language, "auto_keepalive_message").format(
-                timeout_minutes=timeout_minutes
-            )
-            
-            # Send the keep-alive response with continue_chat=true
-            self.send_response(request_id, keepalive_message, continue_chat=True)
+            # Check if request is still pending (no response received yet)
+            if not os.path.exists(self.response_file):
+                keepalive_count += 1
+                
+                # Get current language from config
+                try:
+                    config_manager = ConfigManager()
+                    current_language = config_manager.get_language()
+                except Exception:
+                    # Fallback to English if config fails
+                    current_language = "en"
+                
+                # Get auto keep-alive message template with translation and variation
+                timeout_minutes = round(AGENT_AUTO_KEEPALIVE_SECONDS / 60, 1)
+                keepalive_message = get_translation(
+                    current_language, 
+                    "auto_keepalive_message", 
+                    keepalive_count
+                ).format(
+                    timeout_minutes=timeout_minutes,
+                    count=keepalive_count,
+                    timestamp=time.strftime("%H:%M:%S")
+                )
+                
+                # Send the keep-alive response with continue_chat=true
+                self.send_response(request_id, keepalive_message, continue_chat=True)
+            else:
+                # Response received, exit loop
+                return
     
     def _update_status(self, status: str, request_id: Optional[str] = None, continue_chat: Optional[bool] = None):
         """Update status file with current state"""

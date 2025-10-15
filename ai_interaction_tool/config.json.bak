@@ -14,19 +14,43 @@
     "save_images_enabled": false
   },
   "last_workspace": {
-    "path": "E:\\MCP-servers-github\\AI-interaction",
-    "name": "AI-interaction",
+    "path": "E:\\work-space\\OMS_project\\OMS_project\\OMS",
+    "name": "OMS",
     "attached_files": [
       {
-        "relative_path": "AI-interaction/ai_interaction_tool",
-        "workspace_name": "AI-interaction",
-        "name": "ai_interaction_tool",
+        "relative_path": "OMS/src/components/MyVirtualTable",
+        "workspace_name": "OMS",
+        "name": "MyVirtualTable",
         "type": "folder"
       },
       {
-        "relative_path": "AI-interaction/ai_interaction_tool/constants.py",
-        "workspace_name": "AI-interaction",
-        "name": "constants.py",
+        "relative_path": "OMS/src/components/MyVirtualTable/VirtualTable.jsx",
+        "workspace_name": "OMS",
+        "name": "VirtualTable.jsx",
+        "type": "file"
+      },
+      {
+        "relative_path": "OMS/src/components/MyVirtualTable/useVirtualTable.jsx",
+        "workspace_name": "OMS",
+        "name": "useVirtualTable.jsx",
+        "type": "file"
+      },
+      {
+        "relative_path": "OMS/src/components/MyVirtualTable/VirtualTable.module.scss",
+        "workspace_name": "OMS",
+        "name": "VirtualTable.module.scss",
+        "type": "file"
+      },
+      {
+        "relative_path": "OMS/dist/VirtualListLibraryContext.txt",
+        "workspace_name": "OMS",
+        "name": "VirtualListLibraryContext.txt",
+        "type": "file"
+      },
+      {
+        "relative_path": "OMS/src/pages/LoginPage/LoginPage.jsx",
+        "workspace_name": "OMS",
+        "name": "LoginPage.jsx",
         "type": "file"
       }
     ]
