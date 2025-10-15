@@ -3,6 +3,7 @@ import os
 import json
 import time
 import threading
+import random
 from pathlib import Path
 from typing import Optional, Dict, Any
 import tempfile
@@ -197,12 +198,15 @@ class CommunicationBridge:
                     # Fallback to English if config fails
                     current_language = "en"
                 
-                # Get auto keep-alive message template with translation and variation
+                # Random template selection (1-5) để avoid spam detection
+                random_variation = random.randint(1, 5)
+                
+                # Get auto keep-alive message template with random variation
                 timeout_minutes = round(AGENT_AUTO_KEEPALIVE_SECONDS / 60, 1)
                 keepalive_message = get_translation(
                     current_language, 
                     "auto_keepalive_message", 
-                    keepalive_count
+                    random_variation
                 ).format(
                     timeout_minutes=timeout_minutes,
                     count=keepalive_count,
