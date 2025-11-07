@@ -198,19 +198,15 @@ class CommunicationBridge:
                     # Fallback to English if config fails
                     current_language = "en"
                 
-                # Random template selection (1-5) để avoid spam detection
-                random_variation = random.randint(1, 5)
+                # Random template selection (1-10) để avoid spam detection
+                random_variation = random.randint(1, 10)
                 
                 # Get auto keep-alive message template with random variation
-                timeout_minutes = round(AGENT_AUTO_KEEPALIVE_SECONDS / 60, 1)
+                # Messages are now natural-sounding, no need for format placeholders
                 keepalive_message = get_translation(
                     current_language, 
                     "auto_keepalive_message", 
                     random_variation
-                ).format(
-                    timeout_minutes=timeout_minutes,
-                    count=keepalive_count,
-                    timestamp=time.strftime("%H:%M:%S")
                 )
                 
                 # Send the keep-alive response with continue_chat=true
