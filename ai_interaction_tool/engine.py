@@ -44,8 +44,31 @@ def run_ui(*args, **kwargs):
         # Process response exactly like original popup mode
         return process_ui_response(content, continue_chat)
     else:
-        # Fallback to popup mode if no persistent UI available
-        return run_popup_ui(*args, **kwargs)
+        # No response from persistent UI - send keep-alive message instead of opening popup
+        # This prevents opening UI without auto keep-alive feature
+        import random
+        from .core.config import ConfigManager
+        from .utils.translations import get_translation
+        
+        # Get current language
+        try:
+            config_manager = ConfigManager()
+            current_language = config_manager.get_language()
+        except Exception:
+            current_language = "en"
+        
+        # Random template selection (1-10) to avoid spam detection
+        random_variation = random.randint(1, 10)
+        
+        # Get auto keep-alive message template
+        keepalive_message = get_translation(
+            current_language, 
+            "auto_keepalive_message", 
+            random_variation
+        )
+        
+        # Return keep-alive message with continue_chat=true to maintain conversation
+        return process_ui_response(keepalive_message, continue_chat=True)
 
 def process_ui_response(text, continue_chat):
     """
@@ -142,7 +165,13 @@ def process_ui_response(text, continue_chat):
 
 def run_popup_ui(*args, **kwargs):
     """
-    Original popup UI mode - creates temporary dialog
+    DEPRECATED: Original popup UI mode - creates temporary dialog
+    
+    WARNING: This function should NOT be used anymore!
+    It creates UI without auto keep-alive feature, which causes issues.
+    
+    Use persistent UI mode instead, or return keep-alive message.
+    This function is kept only for backward compatibility.
     """
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication(sys.argv)
     
