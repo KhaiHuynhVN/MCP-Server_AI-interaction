@@ -1196,6 +1196,43 @@ class PersistentInputDialog(InputDialog):
         # Insert at the top of the layout (after language selection)
         self.layout.insertWidget(1, keepalive_container)
     
+    def _send_keepalive_message(self):
+        """Send keep-alive message to agent when countdown reaches zero"""
+        import random
+        
+        if not self.current_request_id:
+            # No active request, cannot send keepalive
+            return
+        
+        # Random template selection (1-10) để avoid spam detection
+        random_variation = random.randint(1, 10)
+        
+        # Get auto keep-alive message template with random variation
+        # Use same logic as communication_bridge.py
+        keepalive_message = get_translation(
+            self.current_language, 
+            "auto_keepalive_message", 
+            random_variation
+        )
+        
+        # Send keep-alive message to agent
+        success = self.bridge.send_response(
+            self.current_request_id,
+            keepalive_message,
+            continue_chat=True  # MUST be true to trigger agent callback
+        )
+        
+        if success:
+            # Reset current request to wait for agent callback with new request
+            # Agent will call tool again due to continue_chat=true, creating new request with new timestamp
+            self.current_request_id = None
+            self.current_request_timestamp = 0
+            
+            # Stop countdown - will restart when new request arrives
+            self._stop_keepalive_countdown()
+            
+            # DON'T clear input - let user continue typing
+    
     def _start_keepalive_countdown(self):
         """Start the keepalive countdown timer when agent request is received"""
         # Stop any existing timer first
@@ -1244,8 +1281,11 @@ class PersistentInputDialog(InputDialog):
         # Decrease countdown
         self.keepalive_remaining_seconds -= 1
         
-        # Reset when reaches zero (simulating keepalive message sent)
+        # Send keepalive message when reaches zero
         if self.keepalive_remaining_seconds <= 0:
+            # Send keep-alive message to agent
+            self._send_keepalive_message()
+            # Reset countdown for next cycle
             self.keepalive_remaining_seconds = AGENT_AUTO_KEEPALIVE_SECONDS
         
         # Convert to int to avoid float format issues
