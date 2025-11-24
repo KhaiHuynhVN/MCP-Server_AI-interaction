@@ -18,9 +18,15 @@
     "name": "AMobile_V2",
     "attached_files": [
       {
-        "relative_path": "AMobile_V2/src/layouts/assets-info/index.js",
+        "relative_path": "AMobile_V2/src/layouts/eKYCFPT/Step03/index.tsx",
         "workspace_name": "AMobile_V2",
-        "name": "index.js",
+        "name": "index.tsx",
+        "type": "file"
+      },
+      {
+        "relative_path": "AMobile_V2/src/layouts/eKYCFPT/Step03/NewCommonInfo/index.tsx",
+        "workspace_name": "AMobile_V2",
+        "name": "index.tsx",
         "type": "file"
       }
     ]

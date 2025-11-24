@@ -224,11 +224,11 @@ def _create_countdown_timestamp_file():
     try:
         with open(timestamp_file, 'w', encoding='utf-8') as f:
             json.dump(timestamp_data, f, ensure_ascii=False, indent=2)
-        # Debug: print success
-        print(f"Countdown file created: {timestamp_file}", file=sys.stderr)
+        # Debug: print success (DISABLED - breaks MCP stdio)
+        # print(f"Countdown file created: {timestamp_file}", file=sys.stderr)
     except Exception as e:
-        # Debug: print error
-        print(f"Error creating countdown file: {e}", file=sys.stderr)
+        # Debug: print error (DISABLED - breaks MCP stdio)
+        # print(f"Error creating countdown file: {e}", file=sys.stderr)
         pass  # Ignore errors, countdown will just not work
 
 def get_countdown_remaining_time():
@@ -251,19 +251,20 @@ def get_countdown_remaining_time():
             elapsed = time.time() - start_time
             remaining = timeout_seconds - elapsed
             
-            print(f"Countdown file found: elapsed={elapsed:.1f}s, remaining={remaining:.1f}s", file=sys.stderr)
+            # print(f"Countdown file found: elapsed={elapsed:.1f}s, remaining={remaining:.1f}s", file=sys.stderr)
             
             if remaining > 0:
                 return remaining
             else:
                 # Expired, remove file
-                print("Countdown expired, removing file", file=sys.stderr)
+                # print("Countdown expired, removing file", file=sys.stderr)
                 os.remove(timestamp_file)
                 return None
         else:
-            print(f"Countdown file not found: {timestamp_file}", file=sys.stderr)
+            # print(f"Countdown file not found: {timestamp_file}", file=sys.stderr)
+            pass
     except Exception as e:
-        print(f"Error reading countdown file: {e}", file=sys.stderr)
+        # print(f"Error reading countdown file: {e}", file=sys.stderr)
         pass
     
     return None

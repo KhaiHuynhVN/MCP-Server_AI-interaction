@@ -54,8 +54,8 @@ def process_images(images_data: List[dict]) -> List[MCPImage]:
             mcp_images.append(mcp_image)
             
         except Exception as e:
-            print(f"Error processing image {i}: {e}", file=sys.stderr)
-            continue
+            # print(f"Error processing image {i}: {e}", file=sys.stderr)
+            continue  # Skip this image to avoid breaking MCP stdio
     
     return mcp_images
 
@@ -124,6 +124,7 @@ def get_image_info(image_data: dict) -> Dict[str, Any]:
                 info["format"] = 'png'
                 
         except Exception as e:
-            print(f"Error getting image info: {e}", file=sys.stderr)
+            # print(f"Error getting image info: {e}", file=sys.stderr)
+            pass  # Silently ignore to avoid breaking MCP stdio
     
     return info 
