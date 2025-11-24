@@ -14,43 +14,13 @@
     "save_images_enabled": false
   },
   "last_workspace": {
-    "path": "E:\\work-space\\OMS_project\\OMS_project\\OMS",
-    "name": "OMS",
+    "path": "C:\\Users\\DemonVN\\work-space-dev-Khai\\Source\\mts-mobile-cross-platform\\Sources\\AMobile_V2",
+    "name": "AMobile_V2",
     "attached_files": [
       {
-        "relative_path": "OMS/src/components/MyVirtualTable",
-        "workspace_name": "OMS",
-        "name": "MyVirtualTable",
-        "type": "folder"
-      },
-      {
-        "relative_path": "OMS/src/components/MyVirtualTable/VirtualTable.jsx",
-        "workspace_name": "OMS",
-        "name": "VirtualTable.jsx",
-        "type": "file"
-      },
-      {
-        "relative_path": "OMS/src/components/MyVirtualTable/useVirtualTable.jsx",
-        "workspace_name": "OMS",
-        "name": "useVirtualTable.jsx",
-        "type": "file"
-      },
-      {
-        "relative_path": "OMS/src/components/MyVirtualTable/VirtualTable.module.scss",
-        "workspace_name": "OMS",
-        "name": "VirtualTable.module.scss",
-        "type": "file"
-      },
-      {
-        "relative_path": "OMS/dist/VirtualListLibraryContext.txt",
-        "workspace_name": "OMS",
-        "name": "VirtualListLibraryContext.txt",
-        "type": "file"
-      },
-      {
-        "relative_path": "OMS/src/pages/LoginPage/LoginPage.jsx",
-        "workspace_name": "OMS",
-        "name": "LoginPage.jsx",
+        "relative_path": "AMobile_V2/src/layouts/assets-info/index.js",
+        "workspace_name": "AMobile_V2",
+        "name": "index.js",
         "type": "file"
       }
     ]

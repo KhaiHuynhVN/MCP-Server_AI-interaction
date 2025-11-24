@@ -1257,7 +1257,7 @@ def apply_semantic_button_color(button, button_type):
     """
     valid_types = ['success', 'warning', 'danger', 'info', 'special', 'secondary']
     if button_type not in valid_types:
-        print(f"Warning: Unknown button type '{button_type}'. Valid types: {valid_types}")
+        print(f"Warning: Unknown button type '{button_type}'. Valid types: {valid_types}", file=sys.stderr)
         return
     
     button.setProperty("button-type", button_type)

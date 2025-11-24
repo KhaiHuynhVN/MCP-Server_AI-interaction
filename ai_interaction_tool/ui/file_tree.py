@@ -246,7 +246,7 @@ class FileTreeView(QtWidgets.QTreeView):
                 self.refreshView()
             
         except Exception as e:
-            print(f"Error in onItemClicked: {str(e)}")
+            print(f"Error in onItemClicked: {str(e)}", file=sys.stderr)
     
     def getSelectedItems(self):
         """Lấy danh sách các item đã chọn"""
@@ -258,7 +258,7 @@ class FileTreeView(QtWidgets.QTreeView):
             self.model.clearSelection()
             self.viewport().update()
         except Exception as e:
-            print(f"Error clearing selection: {str(e)}")
+            print(f"Error clearing selection: {str(e)}", file=sys.stderr)
     
     def refreshView(self):
         """Force refresh toàn bộ tree view"""
@@ -266,7 +266,7 @@ class FileTreeView(QtWidgets.QTreeView):
             self.viewport().update()
             self.repaint()
         except Exception as e:
-            print(f"Error refreshing view: {str(e)}")
+            print(f"Error refreshing view: {str(e)}", file=sys.stderr)
     
     def deselectItem(self, item_path):
         """Bỏ chọn một item cụ thể"""
@@ -283,7 +283,7 @@ class FileTreeView(QtWidgets.QTreeView):
             self._deselectItemRecursive(root_index, normalized_path)
             
         except Exception as e:
-            print(f"Error deselecting item: {str(e)}")
+            print(f"Error deselecting item: {str(e)}", file=sys.stderr)
     
     def _deselectItemAtLevel(self, parent_index, item_path):
         """Tìm và bỏ chọn item ở một level cụ thể"""
