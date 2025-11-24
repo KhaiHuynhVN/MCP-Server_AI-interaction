@@ -178,42 +178,49 @@ class CommunicationBridge:
             request_id: Request ID to send keep-alive for
             stop_event: Event to stop the worker
         """
-        keepalive_count = 0
-        
-        while True:
-            # Wait for the specified timeout period
-            if stop_event.wait(timeout=AGENT_AUTO_KEEPALIVE_SECONDS):
-                # Stop event was set, exit cleanly
-                return
+        try:
+            keepalive_count = 0
             
-            # Check if request is still pending (no response received yet)
-            if not os.path.exists(self.response_file):
-                keepalive_count += 1
+            while True:
+                # Wait for the specified timeout period
+                if stop_event.wait(timeout=AGENT_AUTO_KEEPALIVE_SECONDS):
+                    # Stop event was set, exit cleanly
+                    return
                 
-                # Get current language from config
-                try:
-                    config_manager = ConfigManager()
-                    current_language = config_manager.get_language()
-                except Exception:
-                    # Fallback to English if config fails
-                    current_language = "en"
-                
-                # Random template selection (1-10) để avoid spam detection
-                random_variation = random.randint(1, 10)
-                
-                # Get auto keep-alive message template with random variation
-                # Messages are now natural-sounding, no need for format placeholders
-                keepalive_message = get_translation(
-                    current_language, 
-                    "auto_keepalive_message", 
-                    random_variation
-                )
-                
-                # Send the keep-alive response with continue_chat=true
-                self.send_response(request_id, keepalive_message, continue_chat=True)
-            else:
-                # Response received, exit loop
-                return
+                # Check if request is still pending (no response received yet)
+                if not os.path.exists(self.response_file):
+                    keepalive_count += 1
+                    
+                    # Get current language from config
+                    try:
+                        config_manager = ConfigManager()
+                        current_language = config_manager.get_language()
+                    except Exception:
+                        # Fallback to English if config fails
+                        current_language = "en"
+                    
+                    # Random template selection (1-10) để avoid spam detection
+                    random_variation = random.randint(1, 10)
+                    
+                    # Get auto keep-alive message template with random variation
+                    # Messages are now natural-sounding, no need for format placeholders
+                    keepalive_message = get_translation(
+                        current_language, 
+                        "auto_keepalive_message", 
+                        random_variation
+                    )
+                    
+                    # Send the keep-alive response with continue_chat=true
+                    self.send_response(request_id, keepalive_message, continue_chat=True)
+                else:
+                    # Response received, exit loop
+                    return
+                    
+        except Exception:
+            # Silently catch ALL exceptions in background thread
+            # This prevents Python from printing traceback to stderr
+            # which would corrupt MCP stdio stream
+            pass
     
     def _update_status(self, status: str, request_id: Optional[str] = None, continue_chat: Optional[bool] = None):
         """Update status file with current state"""
