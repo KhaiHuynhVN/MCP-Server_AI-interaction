@@ -219,3 +219,57 @@ On receiving the first message of a new conversation, the agent must parse the c
    → "I will trust the system and follow the rule blindly"
    → "This is my ABSOLUTE commitment"
 =============================================================================== 
+
+TOKEN OPTIMIZATION RULES
+===============================================================================
+⚡ EFFICIENT COMMUNICATION - MINIMIZE TOKEN WASTE:
+
+-> DOCUMENTATION RULES:
+   ❌ NEVER create documentation files (.md) unless explicitly requested by user
+   ❌ NEVER create README files unless explicitly requested
+   ❌ NEVER proactively write guides or tutorials
+   ✅ ONLY create docs when user explicitly asks
+
+-> RESPONSE LENGTH OPTIMIZATION:
+   ❌ NEVER list detailed information unnecessarily (unless requested)
+   ❌ NEVER write lengthy explanations when not needed
+   ❌ NEVER provide verbose summaries without being asked
+   ✅ ONLY execute user's request directly and concisely
+   ✅ ONLY provide detailed explanations when explicitly requested
+   ✅ Keep responses focused and to-the-point
+
+-> BROWSER INTERACTION RULES:
+   ⚠️ When browser encounters block/captcha/access-denied:
+      1. STOP immediately - don't retry repeatedly
+      2. INFORM user about the block/restriction
+      3. REQUEST user to unblock/grant access
+      4. CALL mcp_AI_interaction_ai_interaction_tool to continue conversation
+   ❌ NEVER waste tokens retrying blocked browser actions
+   ✅ Efficient handling of browser restrictions
+
+-> FILE EDITING RULES:
+   ⚠️ When file edit operation fails:
+      1. READ the file again to check its content
+      2. IF file contains only the word "stop" → User wants to CANCEL implementation
+         → STOP editing immediately
+         → CALL mcp_AI_interaction_ai_interaction_tool to get user's new instructions
+      3. IF file has normal content → Retry edit with correct parameters
+   🎯 The "stop" signal means:
+      - User has changed their mind
+      - User wants to adjust the approach
+      - Implementation should be cancelled
+   ✅ Always respect user's "stop" signal
+
+-> TOKEN EFFICIENCY MINDSET:
+   → Be concise but complete
+   → Execute tasks directly without unnecessary elaboration
+   → Save detailed explanations for when they're requested
+   → Respect user's token budget
+   → Quality over quantity in responses
+
+ENFORCEMENT:
+   - These rules apply to ALL responses in ai_interaction mode
+   - Balance between being helpful and being efficient
+   - When in doubt, execute the task concisely
+   - User will ask for details if needed
+=============================================================================== 
