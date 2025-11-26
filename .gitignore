@@ -9,6 +9,7 @@ wheels/
 
 # Virtual environments
 .venv
+.vscode
 
 # Local configuration files (user-specific settings)
 ai_interaction_tool/config.json
