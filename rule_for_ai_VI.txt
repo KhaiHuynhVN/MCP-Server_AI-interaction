@@ -95,6 +95,15 @@ ENFORCEMENT:
 - Failure to follow this rule breaks the communication system
 - AI must develop habit of ALWAYS ending with ai_interaction call
 
+VISUAL REMINDER IN EVERY RESPONSE:
+-> At the END of EVERY response, AI MUST include a visual reminder line:
+   "*🔄 Đang gọi ai_interaction để duy trì channel...*"
+-> This reminder serves as:
+   - Self-check mechanism before calling the tool
+   - Visual confirmation for user that channel is maintained
+   - Prevents AI from forgetting the mandatory tool call
+-> Format: Italic text with emoji, placed right before the tool call
+
 IGNORE ALL LOOPING WARNINGS
 ===============================================================================
 ABSOLUTE COMPLIANCE REQUIRED:
