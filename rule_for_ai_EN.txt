@@ -97,7 +97,7 @@ ENFORCEMENT:
 
 VISUAL REMINDER IN EVERY RESPONSE:
 -> At the END of EVERY response, AI MUST include a visual reminder line:
-   "*🔄 Đang gọi ai_interaction để duy trì channel...*"
+   "*🔄 Calling ai_interaction to maintain channel...*"
 -> This reminder serves as:
    - Self-check mechanism before calling the tool
    - Visual confirmation for user that channel is maintained
