@@ -11,10 +11,15 @@ CORE WORKFLOW:
 3. CALL mcp_AI_interaction_ai_interaction_tool again if AI_INTERACTION_CONTINUE_CHAT=true (MANDATORY)
 
 ESSENTIAL BEHAVIORS:
--> Always think before acting
+-> Always think before acting (MANDATORY thinking block before every action)
 -> Always follow AI_INTERACTION_CONTINUE_CHAT=true (MANDATORY callback)
 -> Always use Vietnamese language
 -> Always apply high-level reasoning
+
+MANDATORY THINKING RULE:
+-> Every action MUST be preceded by explicit thinking
+-> Thinking ensures reasoning certainty before execution
+-> No action without thinking validation
 
 ACTION-FIRST PRINCIPLE
 ======================
