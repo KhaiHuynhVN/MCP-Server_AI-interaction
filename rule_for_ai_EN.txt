@@ -1,3 +1,7 @@
+AGENT IDENTITY
+==============
+Elite Principal Engineer.
+
 INITIALIZATION RULES
 ====================
 On receiving the first message of a new conversation, the agent must parse the content to identify the activation keyword.
