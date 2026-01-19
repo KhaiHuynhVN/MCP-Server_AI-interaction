@@ -1,0 +1,300 @@
+{
+  "meta": {
+    "path": "C:\\Users\\DemonVN\\work-space-dev-Khai\\source\\web-booking-admin\\src",
+    "framework": "angular",
+    "scannedAt": "2026-01-18T14:17:00.649Z",
+    "fileCount": 1,
+    "classCount": 1,
+    "functionCount": 0
+  },
+  "tree": {
+    "name": "filtered",
+    "type": "directory",
+    "children": [
+      {
+        "name": "app",
+        "type": "directory",
+        "children": [
+          {
+            "name": "api",
+            "type": "directory",
+            "children": [
+              {
+                "name": "resources",
+                "type": "directory",
+                "children": [
+                  {
+                    "name": "salon.service.ts",
+                    "type": "file"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "files": [
+    {
+      "path": "C:/Users/DemonVN/work-space-dev-Khai/source/web-booking-admin/src/app/api/resources/salon.service.ts",
+      "relativePath": "app/api/resources/salon.service.ts",
+      "imports": [
+        {
+          "module": "@angular/core",
+          "named": [
+            "Injectable"
+          ]
+        },
+        {
+          "module": "rxjs",
+          "named": [
+            "Observable"
+          ]
+        },
+        {
+          "module": "rxjs/operators",
+          "named": [
+            "map"
+          ]
+        },
+        {
+          "module": "@/api/utils",
+          "named": [
+            "ApiUtils",
+            "AssetHelper",
+            "CryptoHelper"
+          ]
+        },
+        {
+          "module": "@environment",
+          "named": [
+            "environment"
+          ]
+        },
+        {
+          "module": "@/api/models",
+          "named": [
+            "PagingResponseModel",
+            "ResponseModel",
+            "SalonEntity",
+            "SalonModel"
+          ]
+        },
+        {
+          "module": "../base/api.base.js",
+          "named": [
+            "BaseApiService"
+          ]
+        },
+        {
+          "module": "../base/operators.js",
+          "named": [
+            "BaseAPIOperator"
+          ]
+        }
+      ],
+      "exports": [
+        "SalonService"
+      ],
+      "classes": [
+        {
+          "name": "SalonService",
+          "line": 12,
+          "extends": "BaseApiService",
+          "implements": [],
+          "decorators": [
+            "@Injectable"
+          ],
+          "methods": [
+            {
+              "name": "list",
+              "line": 16,
+              "params": [
+                {
+                  "name": "options",
+                  "type": "{ pattern: string; index: number; size: number; sort?: string; }"
+                }
+              ],
+              "returnType": "import(\"C:/Users/DemonVN/work-space-dev-Khai/source/web-booking-admin/node_modules/rxjs/dist/types/internal/Observable\").Observable<{ data: SalonModel[]; total: any; }>",
+              "modifiers": [],
+              "decorators": [],
+              "calls": [
+                "ApiUtils.removeEmpty",
+                "this._http .get<PagingResponseModel<SalonEntity>>(`${this._baseUrl}/search`, { params: query }) .pipe",
+                "this._http .get",
+                "BaseAPIOperator.responseHandler",
+                "map",
+                "(res?.list ?? []).map",
+                "((entity?.images as string) ?? '') ?.split(',') ?.filter((url) => !!url) ?.map",
+                "((entity?.images as string) ?? '') ?.split(',') ?.filter",
+                "((entity?.images as string) ?? '') ?.split",
+                "AssetHelper.from",
+                "[ entity?.street, entity?.city, [entity?.state, entity?.zipCode].filter((a) => !!a).join(' '), entity?.country, ] .filter((a) => !!a) .join",
+                "[ entity?.street, entity?.city, [entity?.state, entity?.zipCode].filter((a) => !!a).join(' '), entity?.country, ] .filter",
+                "[entity?.state, entity?.zipCode].filter((a) => !!a).join",
+                "[entity?.state, entity?.zipCode].filter",
+                "encodeURI"
+              ],
+              "calledBy": [
+                "SalonsComponent._load"
+              ],
+              "callChain": [
+                [
+                  "SalonsComponent._load",
+                  "SalonService.list"
+                ]
+              ]
+            },
+            {
+              "name": "status",
+              "line": 64,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                },
+                {
+                  "name": "status",
+                  "type": "string"
+                }
+              ],
+              "returnType": "import(\"C:/Users/DemonVN/work-space-dev-Khai/source/web-booking-admin/node_modules/rxjs/dist/types/internal/Observable\").Observable<any>",
+              "modifiers": [],
+              "decorators": [],
+              "calls": [
+                "this._http .post<ResponseModel>(`${this._baseUrl}/update-status/${id}`, { status }) .pipe",
+                "this._http .post",
+                "BaseAPIOperator.responseHandler"
+              ],
+              "calledBy": [
+                "SalonsComponent._update"
+              ],
+              "callChain": [
+                [
+                  "SalonsComponent._update",
+                  "SalonService.status"
+                ]
+              ]
+            },
+            {
+              "name": "toggleTest",
+              "line": 70,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                },
+                {
+                  "name": "isTestStore",
+                  "type": "boolean"
+                }
+              ],
+              "returnType": "import(\"C:/Users/DemonVN/work-space-dev-Khai/source/web-booking-admin/node_modules/rxjs/dist/types/internal/Observable\").Observable<any>",
+              "modifiers": [],
+              "decorators": [],
+              "calls": [
+                "this._http .patch<ResponseModel>(`${this._baseUrl}/stores/${id}`, ApiUtils.patchObject(entity)) .pipe",
+                "this._http .patch",
+                "ApiUtils.patchObject",
+                "BaseAPIOperator.responseHandler"
+              ],
+              "calledBy": [
+                "SalonsComponent.tableToggleTestSalon"
+              ],
+              "callChain": [
+                [
+                  "template:app/pages/salons/salons.component.ts",
+                  "SalonsComponent.tableToggleTestSalon",
+                  "SalonService.toggleTest"
+                ]
+              ]
+            },
+            {
+              "name": "token",
+              "line": 78,
+              "params": [
+                {
+                  "name": "id",
+                  "type": "string"
+                }
+              ],
+              "returnType": "import(\"C:/Users/DemonVN/work-space-dev-Khai/source/web-booking-admin/node_modules/rxjs/dist/types/internal/Observable\").Observable<string>",
+              "modifiers": [],
+              "decorators": [],
+              "calls": [
+                "this._http .get<ResponseModel>(`${environment.apiUrl}/auth/admin/store-owner-token/${id}`) .pipe",
+                "this._http .get",
+                "BaseAPIOperator.responseHandler",
+                "map",
+                "CryptoHelper.decrypt",
+                "console.error"
+              ],
+              "calledBy": [
+                "SalonsComponent.access"
+              ],
+              "callChain": [
+                [
+                  "template:app/pages/salons/salons.component.ts",
+                  "SalonsComponent.access",
+                  "SalonService.token"
+                ]
+              ]
+            }
+          ],
+          "properties": [
+            {
+              "name": "_baseUrl",
+              "line": 14,
+              "type": "string",
+              "modifiers": [
+                "override"
+              ],
+              "decorators": [],
+              "initializer": "`${environment.apiUrl}/stores/admin`"
+            }
+          ]
+        }
+      ],
+      "functions": []
+    }
+  ],
+  "callGraph": {
+    "SalonService.list": [
+      "ApiUtils.removeEmpty",
+      "this._http .get<PagingResponseModel<SalonEntity>>(`${this._baseUrl}/search`, { params: query }) .pipe",
+      "this._http .get",
+      "BaseAPIOperator.responseHandler",
+      "map",
+      "(res?.list ?? []).map",
+      "((entity?.images as string) ?? '') ?.split(',') ?.filter((url) => !!url) ?.map",
+      "((entity?.images as string) ?? '') ?.split(',') ?.filter",
+      "((entity?.images as string) ?? '') ?.split",
+      "AssetHelper.from",
+      "[ entity?.street, entity?.city, [entity?.state, entity?.zipCode].filter((a) => !!a).join(' '), entity?.country, ] .filter((a) => !!a) .join",
+      "[ entity?.street, entity?.city, [entity?.state, entity?.zipCode].filter((a) => !!a).join(' '), entity?.country, ] .filter",
+      "[entity?.state, entity?.zipCode].filter((a) => !!a).join",
+      "[entity?.state, entity?.zipCode].filter",
+      "encodeURI"
+    ],
+    "SalonService.status": [
+      "this._http .post<ResponseModel>(`${this._baseUrl}/update-status/${id}`, { status }) .pipe",
+      "this._http .post",
+      "BaseAPIOperator.responseHandler"
+    ],
+    "SalonService.toggleTest": [
+      "this._http .patch<ResponseModel>(`${this._baseUrl}/stores/${id}`, ApiUtils.patchObject(entity)) .pipe",
+      "this._http .patch",
+      "ApiUtils.patchObject",
+      "BaseAPIOperator.responseHandler"
+    ],
+    "SalonService.token": [
+      "this._http .get<ResponseModel>(`${environment.apiUrl}/auth/admin/store-owner-token/${id}`) .pipe",
+      "this._http .get",
+      "BaseAPIOperator.responseHandler",
+      "map",
+      "CryptoHelper.decrypt",
+      "console.error"
+    ]
+  }
+}

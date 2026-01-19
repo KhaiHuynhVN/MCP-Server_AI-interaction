@@ -1,0 +1,17 @@
+{
+  "name": "project-scanner",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "scan": "npx tsx scan.ts"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.3",
+    "ts-morph": "^27.0.2",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "@types/node": "^25.0.9"
+  }
+}
