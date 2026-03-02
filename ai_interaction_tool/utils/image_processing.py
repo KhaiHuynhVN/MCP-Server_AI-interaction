@@ -1,26 +1,31 @@
 """
 Image processing utilities for AI Interaction Tool
-Handles conversion of base64 image data to MCP Image objects
+Handles conversion of base64 image data to MCP ImageContent objects
 """
 
-from mcp.server.fastmcp.utilities.types import Image as MCPImage
+from mcp.types import ImageContent
 import base64
 import sys
 from typing import List, Dict, Any
 
+MIME_TYPE_MAP = {
+    'jpeg': 'image/jpeg',
+    'jpg': 'image/jpeg',
+    'png': 'image/png',
+    'gif': 'image/gif',
+    'webp': 'image/webp',
+}
 
-def process_images(images_data: List[dict]) -> List[MCPImage]:
+
+def process_images(images_data: List[dict]) -> List[ImageContent]:
     """
-    Process image data and convert to MCP Image objects
+    Process image data and convert to MCP ImageContent objects
     
     Args:
         images_data: List of image dictionaries containing base64_data, media_type, filename
         
     Returns:
-        List[MCPImage]: Processed MCP Image objects ready for server response
-        
-    Note:
-        Uses same approach as mcp-feedback-enhanced for compatibility
+        List[ImageContent]: Processed MCP ImageContent objects ready for server response
     """
     mcp_images = []
     
@@ -29,33 +34,30 @@ def process_images(images_data: List[dict]) -> List[MCPImage]:
             if not img.get("base64_data"):
                 continue
             
-            # Decode base64 to raw bytes (mcp-feedback-enhanced approach)
-            if isinstance(img["base64_data"], str):
-                image_bytes = base64.b64decode(img["base64_data"])
-            else:
+            if not isinstance(img["base64_data"], str):
                 continue
             
+            image_bytes = base64.b64decode(img["base64_data"])
             if len(image_bytes) == 0:
                 continue
             
-            # Determine format from media_type or filename
             media_type = img.get("media_type", "image/png")
             filename = img.get("filename", "image.png")
             
             if "jpeg" in media_type or "jpg" in media_type or filename.lower().endswith(('.jpg', '.jpeg')):
-                image_format = 'jpeg'
+                mime_type = "image/jpeg"
             elif "gif" in media_type or filename.lower().endswith('.gif'):
-                image_format = 'gif'
+                mime_type = "image/gif"
+            elif "webp" in media_type or filename.lower().endswith('.webp'):
+                mime_type = "image/webp"
             else:
-                image_format = 'png'  # Default to PNG
+                mime_type = "image/png"
             
-            # Create MCPImage with raw bytes (NOT base64 string!)
-            mcp_image = MCPImage(data=image_bytes, format=image_format)
-            mcp_images.append(mcp_image)
+            b64_str = base64.b64encode(image_bytes).decode('utf-8')
+            mcp_images.append(ImageContent(type="image", data=b64_str, mimeType=mime_type))
             
-        except Exception as e:
-            # print(f"Error processing image {i}: {e}", file=sys.stderr)
-            continue  # Skip this image to avoid breaking MCP stdio
+        except Exception:
+            continue
     
     return mcp_images
 

@@ -3,42 +3,31 @@ Response formatting utilities for AI Interaction Tool
 Handles mixed content responses with text, images, and control tags
 """
 
-from mcp.types import TextContent
+from mcp.types import TextContent, ImageContent
 from typing import List, Dict, Any, Union
 from ..utils.image_processing import process_images
 
 
-def format_mixed_response(result: Dict[str, Any]) -> List:
+def format_mixed_response(result: Dict[str, Any]) -> List[Union[TextContent, ImageContent]]:
     """
     Format response containing both text and images with control tags
-    
-    Args:
-        result: Dictionary containing text_content, attached_images, attached_files, etc.
-        
-    Returns:
-        List containing TextContent and MCPImage objects
     """
     response_items = []
     
-    # Extract components from result
     user_text = result.get('text_content', '')
     attached_files = result.get('attached_files', [])
     attached_images = result.get('attached_images', [])
     continue_chat = result.get('continue_chat', False)
 
-    
-    # Build complete text content with all tags
     full_text_content = _build_text_content_with_tags(
         user_text, attached_files, continue_chat
     )
     
-    # Add text content with ALL tags
     response_items.append(TextContent(type="text", text=full_text_content))
     
-    # Add images as MCPImage objects if any
     if attached_images:
         mcp_images = process_images(attached_images)
-        response_items.extend(mcp_images)  # Direct extend like mcp-feedback-enhanced
+        response_items.extend(mcp_images)
     
     return response_items
 
