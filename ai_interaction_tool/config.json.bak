@@ -1,22 +1,15 @@
 {
   "language": "vi",
   "window_size": {
-    "width": 1161,
-    "height": 885
+    "width": 1030,
+    "height": 923
   },
   "ui_preferences": {
     "continue_chat_default": true,
     "remember_last_path": true,
     "auto_expand_folders": true,
     "auto_keepalive_default": false,
-    "enable_thinking_default": "high",
-    "max_reasoning_default": false,
     "save_images_enabled": false
-  },
-  "last_workspace": {
-    "path": "C:\\Users\\DemonVN\\work-space-dev-Khai\\Source\\mts-mobile-cross-platform\\Sources\\AMobile_V2",
-    "name": "AMobile_V2",
-    "attached_files": []
   },
   "last_attached_images": []
 }
